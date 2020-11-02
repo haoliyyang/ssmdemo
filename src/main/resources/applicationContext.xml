@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+                         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+<!--扫包  -->
+<context:component-scan base-package="com.yg.service,com.yg.dao">
+<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+
+<!-- 引入外部属性配置文件 -->
+<context:property-placeholder location="classpath:jdbc.properties"/>
+<!--数据库连接池  -->
+<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+<!--手动装配，普通属性  -->
+<!-- 基本配置 -->
+<!-- 驱动 -->
+<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+<!--数据库连接地址  -->
+<property name="url" value="jdbc:mysql://localhost:3306/projectdemo"></property>
+<!-- 用户名 -->
+<property name="username" value="root"></property>
+<!-- 密码 -->
+<property name="password" value="19971226"></property>
+</bean>
+
+<!-- 创建 jdbcTemplate-->
+<!-- <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+<property name="dataSource" ref="dataSource"></property>ref引入对象属性
+</bean> -->
+
+
+<!--整合mybatis
+    1.spring管理所有组件
+    2.spring管理事务
+  -->
+  <!--创建sqlSessionFactoryBean  -->
+  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+  <!--引入数据源  -->
+  <property name="dataSource" ref="dataSource"></property>
+  <!-- 加载Mybatis全局配置文件 -->
+  <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+  <!--自动扫描mappering.xml文件  -->
+  <property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+  </bean>
+<!-- 扫描所有mapper接口，将接口实现自动注入IOC容器 -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+<property name="basePackage" value="com.yg.dao"></property>
+</bean>
+
+<!-- 事务管理器 -->
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+<property name="dataSource" ref="dataSource"></property>
+</bean>
+
+<!-- 开启基于注解的事务 -->
+<tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+
+
+
+
+
+
+</beans>
